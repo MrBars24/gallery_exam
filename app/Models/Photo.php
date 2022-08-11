@@ -19,11 +19,12 @@ class Photo extends Model
 	 * @var array
 	 */
 	protected $fillable = [
+		'album_id',
 		'title',
         'url',
         'thumbnail_url'
     ];
-    
+
     protected $appends = ['photos_count'];
 
 	/**
@@ -40,6 +41,6 @@ class Photo extends Model
 
     public function album()
     {
-        return $this->belongsTo('App\Models\Album');
+        return $this->belongsTo(Album::class);
     }
 }

@@ -20,6 +20,7 @@ class Album extends Model
 	 * @var array
 	 */
 	protected $fillable = [
+		'person_id',
 		'title',
     ];
 
@@ -35,13 +36,13 @@ class Album extends Model
     ];
 
     protected $appends = ['photo_count'];
-    
+
     /**
      * Get the photos of album.
      */
     public function photos()
     {
-        return $this->hasMany('App\Models\Photo');
+        return $this->hasMany(Photo::class);
     }
 
     /**

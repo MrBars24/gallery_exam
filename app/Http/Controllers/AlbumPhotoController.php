@@ -5,17 +5,18 @@ namespace App\Http\Controllers;
 use App\Helpers\ListingHelper;
 use App\Http\Resources\ResponseResource;
 use App\Models\Album;
+use App\Models\Photo;
 use Exception;
 use Illuminate\Http\Request;
 
-class AlbumController extends Controller
+class AlbumPhotoController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request, $albumId)
     {
         [
             'sort' => $sort,
@@ -26,7 +27,8 @@ class AlbumController extends Controller
             'filters' => $filters
         ] = ListingHelper::getPaginationRequests();
 
-        $query = Album::withCount('photos');
+        $query = Photo::where('album_id', $albumId);
+
         if (count($filters) > 0) {
             $query->where(function ($q) use ($filters) {
                 foreach ($filters as $filter_field => $filter_value) {
@@ -36,9 +38,7 @@ class AlbumController extends Controller
         }
 
         if (!empty($searchKeyword)) {
-            $query->where('name', 'LIKE', '%' . $searchKeyword . '%');
-            $query->orWhere('username', 'LIKE', '%' . $searchKeyword . '%');
-            $query->orWhere('email', 'LIKE', '%' . $searchKeyword . '%');
+            $query->where('title', 'LIKE', '%' . $searchKeyword . '%');
         }
 
         if ($showAllRecords) {
@@ -59,17 +59,20 @@ class AlbumController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $albumId)
     {
         try {
-            $album = Album::create([
+            $album = Album::findOrFail($albumId);
+
+            $photo = $album->photos()->create([
                 'title' => $request->title,
-                'person_id' => $request->user_id
+                'url' => $request->url,
+                'thumbnail_url' => $request->thumbnail_url,
             ]);
 
             return response()->json([
-                'data' => $album,
-                'message' => 'Album has been created.',
+                'data' => $photo,
+                'message' => 'Album photo has been created.',
                 'success' => true,
             ]);
         } catch(Exception $e) {
@@ -78,36 +81,26 @@ class AlbumController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Album  $album
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Album $album)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Album  $album
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $albumId, $id)
     {
         try {
-            $album = Album::findOrFail($id);
+            $photo = Photo::where('album_id', $albumId)
+                        ->where('id', $id)
+                        ->firstOrFail();
 
-            $album->update([
-                'person_id' => $request->user_id,
+            $photo->update([
                 'title' => $request->title,
             ]);
 
             return response()->json([
-                'data' => $album,
-                'message' => 'Album has been updated.',
+                'data' => $photo,
+                'message' => 'Album photo has been updated.',
                 'success' => true,
             ]);
         } catch(Exception $e) {
@@ -118,16 +111,20 @@ class AlbumController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Album  $album
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($albumId, $id)
     {
         try {
-            Album::findOrFail($id)->delete();
+            $photo = Photo::where('album_id', $albumId)
+                        ->where('id', $id)
+                        ->firstOrFail();
+
+            $photo->delete();
 
             return response()->json([
-                'message' => 'Album has been deleted.',
+                'message' => 'Album photo has been deleted.',
                 'success' => true,
             ]);
         } catch(Exception $e) {

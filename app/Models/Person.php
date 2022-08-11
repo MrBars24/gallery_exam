@@ -12,7 +12,7 @@ class Person extends Model
 	 * @var string
 	 */
 	protected $table = 'persons';
-	
+
 	/**
 	 * The database table used by the model.
 	 *
@@ -27,11 +27,12 @@ class Person extends Model
 	 */
 	protected $fillable = [
 		'name',
-		'username', 
-		'email', 
+		'username',
+		'email',
 		'street',
 		'suite',
 		'city',
+		'phone',
 		'zipcode',
 		'geo_lat',
 		'geo_lng',
@@ -49,7 +50,7 @@ class Person extends Model
 	protected $visible = [
 		'id',
 		'name',
-		'username', 
+		'username',
 		'email',
 		'name_initials'
 	];
@@ -70,5 +71,10 @@ class Person extends Model
     public function albums()
     {
         return $this->hasMany(Album::class);
+    }
+
+    public function photos()
+    {
+        return $this->hasManyThrough(Photo::class, Album::class);
     }
 }

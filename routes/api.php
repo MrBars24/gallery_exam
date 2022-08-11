@@ -17,14 +17,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::apiResource('/user/{user_id}/albums', UserAlbumController::class);
+Route::apiResource('/user/{user_id}/photos', UserPhotoController::class);
+Route::apiResource('user', PersonController::class);
 
-Route::get('/user/{user_id}/albums', array('uses' => 'AlbumController@index'));
-Route::put('/photo/{photo}', array('uses' => 'PhotoController@update'));
-Route::delete('/photo/{photo}', array('uses' => 'PhotoController@destroy'));
-Route::post('/photo', array('uses' => 'PhotoController@store'));
-Route::get('/album/{album_id}/photos', array('uses' => 'PhotoController@index'));
-Route::get('/photo/{photo}', array('uses' => 'PhotoController@show'));
+Route::apiResource('album', AlbumController::class);
+Route::apiResource('album/{album_id}/photos', AlbumPhotoController::class);
 
-Route::apiResource('persons', PersonController::class)->except([
-    'store', 'update', 'destroy'
-]);
+Route::apiResource('photo', PhotoController::class);
